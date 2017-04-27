@@ -1,0 +1,11 @@
+<launch>
+  <param name="/use_sim_time" value="true"/>
+    
+  <include file="$(find turtlepi_gazebo)/launch/turtlepi_world.launch">
+    <arg name="world_file" value="$(find turtlepi_gazebo)/worlds/circuit2.world"/>
+  </include>
+  <include file="$(find kobuki_keyop)/launch/keyop.launch"/> 
+  <include file="$(find turtlebot_navigation)/launch/includes/gmapping/gmapping.launch.xml"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_rviz_launchers)/rviz/navigation.rviz"/>  
+</launch>
