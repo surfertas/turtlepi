@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="target_generator" pkg="turtlepi_navigate" type="target_generator_service" output="screen"/>
+    <node name="turtlepi_navigate" pkg="turtlepi_navigate" type="turtlepi_nav_node" output="screen"/>
+</launch>
