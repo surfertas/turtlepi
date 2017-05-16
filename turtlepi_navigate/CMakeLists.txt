@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nav_msgs
   map_msgs 
+  visualization_msgs
+  tf2_geometry_msgs
   tf
   roscpp
   message_generation
@@ -131,6 +133,8 @@ catkin_package(
     nav_msgs
     map_msgs
     geometry_msgs 
+    visualization_msgs
+    tf2_geometry_msgs
     tf
     roscpp
 #  DEPENDS system_lib
