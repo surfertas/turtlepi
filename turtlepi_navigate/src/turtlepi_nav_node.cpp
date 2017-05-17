@@ -17,13 +17,12 @@ int main(int argc, char** argv)
         auto call_success = ros::service::call(
             "/turtlepi_navigate/generate_nav_target", srv);
 
-        std::cout << call_success << std::endl;
-
         navigator.sendTarget(srv);
     } else {
         std::cout << "Timed out on waiting for service." << std::endl;
     }
     ros::spin();
+
     return 0;
 }
 

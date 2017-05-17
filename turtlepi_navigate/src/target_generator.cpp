@@ -43,7 +43,7 @@ using costmap_2d::FREE_SPACE;
     {
         srv_generate_target_ =
             nh_.advertiseService("/turtlepi_navigate/generate_nav_target", &TargetGenerator::generateTargetService, this);
-            std::cout << "Registered generate target server." << std::endl;
+        std::cout << "Registered generate target server." << std::endl;
     }
 
     void TargetGenerator::currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location)
@@ -53,8 +53,19 @@ using costmap_2d::FREE_SPACE;
 
     void TargetGenerator::mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy)
     {
+        //TODO: Need to check whether or not if coordinates are in the
+        //map...getting warnings that its not in map.
         wx = map_origin_x_ + (mx + 0.5) * map_resolution_;
         wy = map_origin_y_ + (my + 0.5) * map_resolution_;
+    }
+
+
+    bool TargetGenerator::checkTargetDistance(double x, double y, double target_x, double target_y)
+    {
+        double dist = sqrt(pow(target_x - x, 2) + pow(target_y - y, 2));
+        std::cout << "Distance to target: " << dist << std::endl;
+        
+        return (dist > DISTANCE_THRESHOLD_);
     }
 
     bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::Request &req,
@@ -67,7 +78,8 @@ using costmap_2d::FREE_SPACE;
 
         double world_x, world_y;
         uint32_t idx; 
- 
+        bool thresh;
+
         do {
             uint32_t map_x = grid_x(gen);
             uint32_t map_y = grid_y(gen);
@@ -81,9 +93,20 @@ using costmap_2d::FREE_SPACE;
             std::cout << "map_size_x_:" << map_size_x_ << std::endl;
             std::cout << "current_x: " << current_position_.pose.pose.position.x << std::endl;
             std::cout << "current_y: " << current_position_.pose.pose.position.y << std::endl;
+            std::cout << "target_x: " << world_x << std::endl;
+            std::cout << "target_y: " << world_y << std::endl;
             std::cout << std::endl;
+
+            thresh = checkTargetDistance(current_position_.pose.pose.position.x,
+                                         current_position_.pose.pose.position.y,
+                                         world_x,
+                                         world_y);
+
+            std::cout << "Threshold met: " << thresh << std::endl;
             ROS_INFO("map data[idx]: %d\n", map_data_[idx]);
-        } while (map_data_[idx] != 0);
+            //TODO: Sometime correct targets are generated but still failing.
+            //Why?
+        } while (!((map_data_[idx] == 0) && (thresh == 1)));
 
         double radians = theta_ * (PI_/180.0);
         
@@ -109,7 +132,6 @@ using costmap_2d::FREE_SPACE;
             ros::Duration(1.0).sleep();
         }
 
-
         geometry_msgs::PoseStamped pose_in;
         geometry_msgs::PoseStamped pose_out;
 
@@ -132,6 +154,7 @@ using costmap_2d::FREE_SPACE;
         // set target orientation of robot.
         theta_ = 90.0;
         PI_ = 3.14159265358;
+        DISTANCE_THRESHOLD_ = 5.0;
     }
 
     bool TargetGenerator::costMapInit()
@@ -139,7 +162,6 @@ using costmap_2d::FREE_SPACE;
         while (!ros::service::waitForService("static_map", ros::Duration(3.0))) {
             std::cout << "Waiting for static_map" << std::endl;
         }
-    
         ros::ServiceClient map_service_client = nh_.serviceClient<nav_msgs::GetMap>("static_map");
         nav_msgs::GetMap srv_map;
 
@@ -150,11 +172,9 @@ using costmap_2d::FREE_SPACE;
             map_size_x_ = srv_map.response.map.info.width;
             map_size_y_ = srv_map.response.map.info.height;
             map_data_ = srv_map.response.map.data;
-            std::cout << "Cost Map updated!" << std::endl;
             return true;
         }
         return false;
-        
     }
 
     void TargetGenerator::targetMarker(uint32_t x, uint32_t y)
