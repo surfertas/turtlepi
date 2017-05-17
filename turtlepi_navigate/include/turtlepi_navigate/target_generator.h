@@ -11,6 +11,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/GetMap.h>
 #include <map_msgs/OccupancyGridUpdate.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <visualization_msgs/Marker.h>
@@ -30,16 +31,14 @@ public:
     TargetGenerator(ros::NodeHandle& nh);
     virtual ~TargetGenerator();
 
-    void setParams();
     void registerSubscriber();
     void registerPublisher();
     void registerService();
-    void costMapUpdateCB(const map_msgs::OccupancyGridUpdate::ConstPtr& grid_msg);
-    void costMapInitCB(const nav_msgs::OccupancyGrid::ConstPtr& grid_msg);
     void currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location);
     bool generateTargetService(turtlepi_navigate::GenerateTarget::Request &req, 
                                turtlepi_navigate::GenerateTarget::Response &res);
-    
+    void setParams();
+    bool costMapInit();
     void mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy);
     void targetMarker(uint32_t x, uint32_t y);
 
