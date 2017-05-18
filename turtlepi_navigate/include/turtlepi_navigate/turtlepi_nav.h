@@ -1,5 +1,5 @@
 /*
- * Author: Tasuku Miura 
+ * Author: Tasuku Miura
  */
 #ifndef TURTLEPI_NAV_H
 #define TURTLEPI_NAV_H
@@ -19,16 +19,15 @@ typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseCl
 class TurtlepiNavigate
 {
 public:
-    TurtlepiNavigate(ros::NodeHandle& nh, std::string action_server);
-    virtual ~TurtlepiNavigate();
+  TurtlepiNavigate(ros::NodeHandle& nh, std::string action_server);
+  virtual ~TurtlepiNavigate();
 
-    void registerPublisher();
-    void sendTarget(turtlepi_navigate::GenerateTarget srv);
-  
+  void registerPublisher();
+  void sendTarget(turtlepi_navigate::GenerateTarget srv);
+
 private:
-    ros::NodeHandle nh_;
-    MoveBaseClient ac_;
+  ros::NodeHandle nh_;
+  MoveBaseClient ac_;
 };
 }
-#endif // TURTLEPI_NAV_H
-
+#endif  // TURTLEPI_NAV_H
