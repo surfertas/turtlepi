@@ -39,14 +39,13 @@ public:
                                turtlepi_navigate::GenerateTarget::Response &res);
     void setParams();
     bool costMapInit();
+    bool checkTargetDistance(double x, double y, double target_x, double target_y); 
     void mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy);
-    void targetMarker(uint32_t x, uint32_t y);
+    void targetMarker(double x, double y);
 
 private:
     ros::NodeHandle nh_;
     ros::Publisher pub_visualization_marker_;
-    ros::Subscriber sub_cost_map_;
-    ros::Subscriber sub_cost_map_update_;
     ros::Subscriber sub_turtlepi_location_;
     ros::ServiceServer srv_generate_target_;
     tf2_ros::Buffer tfBuffer_;
@@ -62,6 +61,7 @@ private:
     double map_origin_y_;
     double theta_;
 
+    double DISTANCE_THRESHOLD_;
     double PI_;
 };
 }

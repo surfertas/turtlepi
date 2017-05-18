@@ -16,9 +16,9 @@ using costmap_2d::FREE_SPACE;
             std::cout << "Issues initializing cost map." << std::endl;
         }
         setParams();
-        registerService();
-        registerPublisher();
         registerSubscriber();
+        registerPublisher();
+        registerService();
     }
 
     TargetGenerator::~TargetGenerator()
@@ -31,6 +31,7 @@ using costmap_2d::FREE_SPACE;
         sub_turtlepi_location_ = 
             nh_.subscribe("/amcl_pose", 10, &TargetGenerator::currentPositionCB, this);
         std::cout << "Registered subscriber." << std::endl;
+    
     }
 
     void TargetGenerator::registerPublisher()
@@ -53,28 +54,25 @@ using costmap_2d::FREE_SPACE;
 
     void TargetGenerator::mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy)
     {
-        //TODO: Need to check whether or not if coordinates are in the
-        //map...getting warnings that its not in map.
         wx = map_origin_x_ + (mx + 0.5) * map_resolution_;
         wy = map_origin_y_ + (my + 0.5) * map_resolution_;
     }
 
-
     bool TargetGenerator::checkTargetDistance(double x, double y, double target_x, double target_y)
     {
         double dist = sqrt(pow(target_x - x, 2) + pow(target_y - y, 2));
-        std::cout << "Distance to target: " << dist << std::endl;
-        
         return (dist > DISTANCE_THRESHOLD_);
     }
 
     bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::Request &req,
                                                 turtlepi_navigate::GenerateTarget::Response &res)
     {
-        std::random_device rd;  //Will be used to obtain a seed for the random number engine
-        std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-        std::uniform_int_distribution<> grid_x(0, map_size_x_);
-        std::uniform_int_distribution<> grid_y(0, map_size_y_);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+
+        // Use 5 as buffer for map boundaries, as want to avoid edge cases.
+        std::uniform_int_distribution<> grid_x(5, map_size_x_-5); 
+        std::uniform_int_distribution<> grid_y(5, map_size_y_-5);
 
         double world_x, world_y;
         uint32_t idx; 
@@ -85,67 +83,27 @@ using costmap_2d::FREE_SPACE;
             uint32_t map_y = grid_y(gen);
 
             mapToWorld(map_x, map_y, world_x, world_y);
-
             idx = map_x + map_y * map_size_x_;
-            std::cout << "idx: " << idx << std::endl;
-            std::cout << "map_x: " << map_x << std::endl;
-            std::cout << "map_y:" << map_y << std::endl;
-            std::cout << "map_size_x_:" << map_size_x_ << std::endl;
-            std::cout << "current_x: " << current_position_.pose.pose.position.x << std::endl;
-            std::cout << "current_y: " << current_position_.pose.pose.position.y << std::endl;
-            std::cout << "target_x: " << world_x << std::endl;
-            std::cout << "target_y: " << world_y << std::endl;
-            std::cout << std::endl;
-
             thresh = checkTargetDistance(current_position_.pose.pose.position.x,
                                          current_position_.pose.pose.position.y,
                                          world_x,
                                          world_y);
-
-            std::cout << "Threshold met: " << thresh << std::endl;
-            ROS_INFO("map data[idx]: %d\n", map_data_[idx]);
-            //TODO: Sometime correct targets are generated but still failing.
-            //Why?
         } while (!((map_data_[idx] == 0) && (thresh == 1)));
 
         double radians = theta_ * (PI_/180.0);
-        
         tf::Quaternion quaternion;
         quaternion = tf::createQuaternionFromYaw(radians);
         geometry_msgs::Quaternion q_msg;
         tf::quaternionTFToMsg(quaternion, q_msg);
 
-        res.goal.target_pose.header.frame_id = "base_link";
+        res.goal.target_pose.header.frame_id = "map";
         res.goal.target_pose.header.stamp = ros::Time::now();
 
         res.goal.target_pose.pose.position.x = world_x;
         res.goal.target_pose.pose.position.y = world_y;
         res.goal.target_pose.pose.orientation =  q_msg;
         res.success = true;
-
-        geometry_msgs::TransformStamped transformStamped;
-        try {
-            transformStamped = tfBuffer_.lookupTransform("map", "base_link",
-                                                         ros::Time(0));
-        } catch (tf2::TransformException &ex) {
-            ROS_WARN("%s", ex.what());
-            ros::Duration(1.0).sleep();
-        }
-
-        geometry_msgs::PoseStamped pose_in;
-        geometry_msgs::PoseStamped pose_out;
-
-        pose_in.pose.position.x = world_x;
-        pose_in.pose.position.y = world_y;
-        pose_in.header.stamp = ros::Time(0);
-        pose_in.header.frame_id = "base_link";
-
-        tfBuffer_.transform(pose_in, pose_out, "map");
-        // TODO: Need to figure correct transform. Should it be base_link to
-        // map? or something else.
-        // TODO: Need to create threshold (if target position is x distance away
-        // from current position.
-        targetMarker(pose_out.pose.position.x, pose_out.pose.position.y);
+        targetMarker(world_x, world_y);
         return res.success;
     }
 
@@ -154,7 +112,7 @@ using costmap_2d::FREE_SPACE;
         // set target orientation of robot.
         theta_ = 90.0;
         PI_ = 3.14159265358;
-        DISTANCE_THRESHOLD_ = 5.0;
+        DISTANCE_THRESHOLD_ = 8.0;
     }
 
     bool TargetGenerator::costMapInit()
@@ -177,7 +135,7 @@ using costmap_2d::FREE_SPACE;
         return false;
     }
 
-    void TargetGenerator::targetMarker(uint32_t x, uint32_t y)
+    void TargetGenerator::targetMarker(double x, double y)
     {
         visualization_msgs::Marker marker;
         marker.header.frame_id = "map";
@@ -186,8 +144,8 @@ using costmap_2d::FREE_SPACE;
         marker.id = 0;
         marker.type = visualization_msgs::Marker::SPHERE;
         marker.action = visualization_msgs::Marker::ADD;
-        marker.pose.position.x = (double)x;
-        marker.pose.position.y = (double)y;
+        marker.pose.position.x = x;
+        marker.pose.position.y = y;
         marker.pose.position.z = 1;
         marker.pose.orientation.x = 0.0;
         marker.pose.orientation.y = 0.0;
