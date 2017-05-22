@@ -50,18 +50,6 @@ void TargetGenerator::currentPositionCB(const geometry_msgs::PoseWithCovarianceS
   current_position_ = *location;
 }
 
-void TargetGenerator::mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy)
-{
-  wx = map_origin_x_ + (mx + 0.5) * map_resolution_;
-  wy = map_origin_y_ + (my + 0.5) * map_resolution_;
-}
-
-bool TargetGenerator::checkTargetDistance(double x, double y, double target_x, double target_y)
-{
-  double dist = sqrt(pow(target_x - x, 2) + pow(target_y - y, 2));
-  return (dist > DISTANCE_THRESHOLD_);
-}
-
 bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::Request& req,
                                             turtlepi_navigate::GenerateTarget::Response& res)
 {
@@ -75,6 +63,10 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
   double world_x, world_y;
   uint32_t idx;
   bool thresh;
+  auto checkThresh = [&](double x, double y, double wx, double wy)
+  {
+    return sqrt(pow(wx - x, 2) + pow(wy - y, 2)) > DISTANCE_THRESHOLD_;
+  };
 
   do
   {
@@ -83,8 +75,9 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
 
     mapToWorld(map_x, map_y, world_x, world_y);
     idx = map_x + map_y * map_size_x_;
-    thresh = checkTargetDistance(current_position_.pose.pose.position.x, current_position_.pose.pose.position.y,
-                                 world_x, world_y);
+    thresh =
+        checkThresh(current_position_.pose.pose.position.x, current_position_.pose.pose.position.y, world_x, world_y);
+
   } while (!((map_data_[idx] == 0) && (thresh == 1)));
 
   double radians = theta_ * (PI_ / 180.0);
@@ -132,6 +125,12 @@ bool TargetGenerator::costMapInit()
     return true;
   }
   return false;
+}
+
+void TargetGenerator::mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy)
+{
+  wx = map_origin_x_ + (mx + 0.5) * map_resolution_;
+  wy = map_origin_y_ + (my + 0.5) * map_resolution_;
 }
 
 void TargetGenerator::targetMarker(double x, double y)

@@ -38,7 +38,6 @@ public:
                              turtlepi_navigate::GenerateTarget::Response& res);
   void setParams();
   bool costMapInit();
-  bool checkTargetDistance(double x, double y, double target_x, double target_y);
   void mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy);
   void targetMarker(double x, double y);
 
