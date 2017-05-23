@@ -1,0 +1,24 @@
+
+<launch>
+  <arg name="world_file"  default="$(find turtlepi_gazebo)/worlds/env0.world"/>
+
+  <param name="/use_sim_time" value="true"/>
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ros_auto_nav_description)/urdf/turtlepi.xacro'" />
+  <remap from="laser_scan" to="scan"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_file)"/>
+    <arg name="gui" value="true"/>
+  </include>
+
+  <include file="$(find kobuki_keyop)/launch/keyop.launch" />
+  <include file="$(find turtlebot_navigation)/launch/includes/gmapping/gmapping.launch.xml"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  <node name="turtlepi_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model turtlepi"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_rviz_launchers)/rviz/navigation.rviz"/>
+
+
+</launch>
+
