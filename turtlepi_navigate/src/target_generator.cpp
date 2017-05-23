@@ -35,13 +35,14 @@ void TargetGenerator::registerSubscriber()
 
 void TargetGenerator::registerPublisher()
 {
-  pub_visualization_marker_ = nh_.advertise<visualization_msgs::Marker>("/turtlepi_navigate/visualization_marker", 0);
+  pub_visualization_marker_ =
+    nh_.advertise<visualization_msgs::Marker>("/turtlepi_navigate/visualization_marker", 0);
 }
 
 void TargetGenerator::registerService()
 {
   srv_generate_target_ =
-      nh_.advertiseService("/turtlepi_navigate/generate_nav_target", &TargetGenerator::generateTargetService, this);
+    nh_.advertiseService("/turtlepi_navigate/generate_nav_target", &TargetGenerator::generateTargetService, this);
   std::cout << "Registered generate target server." << std::endl;
 }
 
@@ -68,6 +69,11 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
     return sqrt(pow(wx - x, 2) + pow(wy - y, 2)) > DISTANCE_THRESHOLD_;
   };
 
+  auto printTarget = [](double wx, double wy)
+  {
+    std::cout << "Target: (" << wx << " ," << wy << ")" << std::endl;
+  };
+   
   do
   {
     uint32_t map_x = grid_x(gen);
@@ -75,8 +81,9 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
 
     mapToWorld(map_x, map_y, world_x, world_y);
     idx = map_x + map_y * map_size_x_;
-    thresh =
-        checkThresh(current_position_.pose.pose.position.x, current_position_.pose.pose.position.y, world_x, world_y);
+    thresh = checkThresh(
+        current_position_.pose.pose.position.x, current_position_.pose.pose.position.y,
+        world_x, world_y);
 
   } while (!((map_data_[idx] == 0) && (thresh == 1)));
 
@@ -88,12 +95,13 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
 
   res.goal.target_pose.header.frame_id = "map";
   res.goal.target_pose.header.stamp = ros::Time::now();
-
   res.goal.target_pose.pose.position.x = world_x;
   res.goal.target_pose.pose.position.y = world_y;
   res.goal.target_pose.pose.orientation = q_msg;
   res.success = true;
+  printTarget(world_x, world_y);
   targetMarker(world_x, world_y);
+
   return res.success;
 }
 
