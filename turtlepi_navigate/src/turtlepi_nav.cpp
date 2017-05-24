@@ -7,6 +7,8 @@ TurtlepiNavigate::TurtlepiNavigate(ros::NodeHandle &nh, std::string action_serve
 {
   while (!ac_.waitForServer(ros::Duration(5.0)))
     std::cout << "Waiting: move_base action server" << std::endl;
+
+  registerPublisher();
 }
 
 TurtlepiNavigate::~TurtlepiNavigate()
@@ -15,23 +17,29 @@ TurtlepiNavigate::~TurtlepiNavigate()
 
 void TurtlepiNavigate::registerPublisher()
 {
+    pub_episode_result_ = nh_.advertise<std_msgs::String>("/turtlepi_navigate/episode_result", 0);
 }
 
 void TurtlepiNavigate::sendTarget(turtlepi_navigate::GenerateTarget srv)
 {
+  // START RECORDER:
   ac_.sendGoal(srv.response.goal);
   std::cout << "sent goal" << std::endl;
 
-  ac_.waitForResult();
+  while (!ac_.waitForResult()) {
+    // recordDataToBag();
+  }
 
-  if (ac_.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-  {
+  actionlib::SimpleClientGoalState result = ac_.getState();
+  std_msgs::String msg;
+  msg.data = result.toString();
+  pub_episode_result_.publish(msg);
+ 
+  if (result == actionlib::SimpleClientGoalState::SUCCEEDED) {
     std::cout << "Target successfully reached." << std::endl;
+  } else {
+    std::cout << "Failed: " << result.toString() << std::endl;
   }
-  else
-  {
-    std::cout << "Failed" << std::endl;
-  }
+  // END RECORDER
 }
-
 }  // namespace turtlepi_navigate
