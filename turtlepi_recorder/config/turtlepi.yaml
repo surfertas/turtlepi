@@ -1,0 +1,2 @@
+topics: '/amcl_pose /ros_out /scan'
+path_to_bag: "/home/tasuku/workspace/ROS/catkin_ws/src/turtlepi_recorder/bag"
