@@ -9,7 +9,7 @@ add_definitions(-std=c++11)
 find_package(catkin REQUIRED
   roscpp
   rosbag  
-
+  std_srvs 
 )
 
 ## System dependencies are found with CMake's conventions
@@ -107,7 +107,7 @@ catkin_package(
 #  LIBRARIES turtlepi_recorder
   CATKIN_DEPENDS 
     roscpp
-    
+    std_srvs  
 #  DEPENDS system_lib
 )
 

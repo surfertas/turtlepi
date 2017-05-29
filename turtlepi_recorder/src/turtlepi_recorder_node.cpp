@@ -16,9 +16,12 @@ int main(int argc, char **argv)
   if (!nh.getParam("turtlepi_recorder/path_to_bag", path_name))
     std::cout << "No path to bag specified." << std::endl;
 
-  if (topics.empty()) {
+  if (topics.empty())
+  {
     options.record_all = true;
-  } else {
+  }
+  else
+  {
     std::regex re_ws("\\s+");
     std::sregex_token_iterator iter(topics.begin(), topics.end(), re_ws, -1);
     std::sregex_token_iterator end;
@@ -28,7 +31,7 @@ int main(int argc, char **argv)
 
     options.topics = topics_record;
   }
-  options.append_date = false;
+  options.append_date = true;
   options.trigger = false;
   options.min_space = 0;
   options.verbose = true;
@@ -36,12 +39,7 @@ int main(int argc, char **argv)
   options.split = false;
   options.regex = false;
 
-  std::cout << "about to initialize recorder." << std::endl;
-
   turtlepi_recorder::TurtlepiRecorder recorder(nh, options);
-
-  //TODO: currently runs, but runs indefinitly need to implement controls around
-  //the recorder. 
 
   ros::spin();
   return 0;

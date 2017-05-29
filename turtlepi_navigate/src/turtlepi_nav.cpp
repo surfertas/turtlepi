@@ -20,9 +20,12 @@ void TurtlepiNavigate::registerPublisher()
     pub_episode_result_ = nh_.advertise<std_msgs::String>("/turtlepi_navigate/episode_result", 0);
 }
 
+
 void TurtlepiNavigate::sendTarget(turtlepi_navigate::GenerateTarget srv)
 {
-  // START RECORDER:
+  std_srvs::SetBool toggle;
+  toggle.request.data = true;
+  ros::service::call("turtlepi_recorder/recorder_control", toggle);
   ac_.sendGoal(srv.response.goal);
   std::cout << "sent goal" << std::endl;
 
@@ -40,6 +43,7 @@ void TurtlepiNavigate::sendTarget(turtlepi_navigate::GenerateTarget srv)
   } else {
     std::cout << "Failed: " << result.toString() << std::endl;
   }
-  // END RECORDER
+  toggle.request.data = false;
+  ros::service::call("turtlepi_recorder/recorder_control", toggle);
 }
 }  // namespace turtlepi_navigate

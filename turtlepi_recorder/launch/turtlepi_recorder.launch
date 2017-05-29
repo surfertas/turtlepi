@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="turtlepi_recorder" pkg="turtlepi_recorder" type="turtlepi_recorder_node" output="screen" respawn="true">
+      <rosparam command="load" file="$(find turtlepi_recorder)/config/turtlepi.yaml"/>
+    </node>
+</launch>

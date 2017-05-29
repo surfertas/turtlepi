@@ -1,2 +1,2 @@
-topics: '/amcl_pose /ros_out /scan'
+topics: '/amcl_pose /ros_out /scan /turtlepi_navigate/episode_result'
 path_to_bag: "/home/tasuku/workspace/ROS/catkin_ws/src/turtlepi_recorder/bag"

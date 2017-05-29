@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <move_base_msgs/MoveBaseAction.h>
-#include "turtlepi_navigate/turtlepi_nav.h"
+#include <turtlepi_navigate/turtlepi_nav.h>
 
 int main(int argc, char** argv)
 {
