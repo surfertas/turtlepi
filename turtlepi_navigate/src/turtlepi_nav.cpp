@@ -17,9 +17,8 @@ TurtlepiNavigate::~TurtlepiNavigate()
 
 void TurtlepiNavigate::registerPublisher()
 {
-    pub_episode_result_ = nh_.advertise<std_msgs::String>("/turtlepi_navigate/episode_result", 0);
+  pub_episode_result_ = nh_.advertise<std_msgs::String>("/turtlepi_navigate/episode_result", 0);
 }
-
 
 void TurtlepiNavigate::sendTarget(turtlepi_navigate::GenerateTarget srv)
 {
@@ -29,7 +28,8 @@ void TurtlepiNavigate::sendTarget(turtlepi_navigate::GenerateTarget srv)
   ac_.sendGoal(srv.response.goal);
   std::cout << "sent goal" << std::endl;
 
-  while (!ac_.waitForResult()) {
+  while (!ac_.waitForResult())
+  {
     // recordDataToBag();
   }
 
@@ -37,10 +37,13 @@ void TurtlepiNavigate::sendTarget(turtlepi_navigate::GenerateTarget srv)
   std_msgs::String msg;
   msg.data = result.toString();
   pub_episode_result_.publish(msg);
- 
-  if (result == actionlib::SimpleClientGoalState::SUCCEEDED) {
+
+  if (result == actionlib::SimpleClientGoalState::SUCCEEDED)
+  {
     std::cout << "Target successfully reached." << std::endl;
-  } else {
+  }
+  else
+  {
     std::cout << "Failed: " << result.toString() << std::endl;
   }
   toggle.request.data = false;
