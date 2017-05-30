@@ -35,20 +35,88 @@ void TargetGenerator::registerSubscriber()
 
 void TargetGenerator::registerPublisher()
 {
-  pub_visualization_marker_ =
-    nh_.advertise<visualization_msgs::Marker>("/turtlepi_navigate/visualization_marker", 0);
+  pub_visualization_marker_ = nh_.advertise<visualization_msgs::Marker>("/turtlepi_navigate/visualization_marker", 0);
 }
 
 void TargetGenerator::registerService()
 {
   srv_generate_target_ =
-    nh_.advertiseService("/turtlepi_navigate/generate_nav_target", &TargetGenerator::generateTargetService, this);
+      nh_.advertiseService("/turtlepi_navigate/generate_nav_target", &TargetGenerator::generateTargetService, this);
   std::cout << "Registered generate target server." << std::endl;
 }
 
 void TargetGenerator::currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location)
 {
   current_position_ = *location;
+}
+
+void TargetGenerator::generateMapFill()
+{
+  // Assumes that first location is a free space.
+  // Assumes that the map is a closed environment
+  std::vector<int32_t> visited(map_data_.size(), 0);
+  uint32_t r_start;
+  uint32_t c_start;
+
+  struct Cell {
+    uint32_t r;
+    uint32_t c;
+    uint32_t idx;
+  };
+
+  // Gets first free space, and uses as starting coordinates in grid map.
+
+  for(auto i = 0; i < map_data_.size(); i++) {
+    if (map_data_[i] == 0) {
+      r_start = (int32_t)(i / map_size_x_);
+      c_start = i - (r_start * map_size_x_);
+    }
+  }
+  std::cout << "r start: " << r_start << "c start: " << c_start << std::endl;
+
+  std::queue<Cell> q;
+  Cell start;
+  start.r = r_start;
+  start.c = c_start;
+  start.idx =  c_start + r_start * (map_size_x_ - 1);
+  q.push(start);
+  std::cout << "mapsize: " << map_data_.size() << std::endl; 
+  while (!q.empty()) {
+    Cell cell = q.front();
+
+    std::cout << "r: " << cell.r << "c: " << cell.c << std::endl;
+
+    uint32_t n = cell.c + cell.r+1 * (map_size_x_ - 1);
+    Cell north = {cell.r+1, cell.c, n};
+    
+    uint32_t e = cell.c+1 + cell.r * (map_size_x_ - 1);
+    Cell east = {cell.r, cell.c+1, e};
+
+    uint32_t s = cell.c + cell.r-1 * (map_size_x_ - 1);
+    Cell south = {cell.r-1, cell.c, s};
+
+    uint32_t w = cell.c-1 + cell.r * (map_size_x_ - 1);
+    Cell west = {cell.r, cell.c-1, w};
+    q.pop();
+
+    // TODO: Need to debug...it seems like it just keeps on goin in loops. Think
+    // about if initializing correctly.
+    for (auto b : {north, east, south, west}) {
+        if (visited[b.idx] != -1) {
+          q.push(b);
+          if (map_data_[b.idx] == 0) {
+            free_space_.insert(b.idx);
+            std::cout << "Inserting: " << b.idx << std::endl;
+            visited[b.idx] = -1;
+          }
+        }
+    }
+  }
+
+  std::cout << "set of free space created." << std::endl;
+  for (auto i : free_space_)
+    std::cout << i << " ";
+  
 }
 
 bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::Request& req,
@@ -73,7 +141,7 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
   {
     std::cout << "Target: (" << wx << " ," << wy << ")" << std::endl;
   };
-   
+
   do
   {
     uint32_t map_x = grid_x(gen);
@@ -81,9 +149,10 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
 
     mapToWorld(map_x, map_y, world_x, world_y);
     idx = map_x + map_y * map_size_x_;
-    thresh = checkThresh(
-        current_position_.pose.pose.position.x, current_position_.pose.pose.position.y,
-        world_x, world_y);
+    thresh = checkThresh(current_position_.pose.pose.position.x, 
+                    current_position_.pose.pose.position.y, 
+                    world_x, 
+                    world_y);
 
   } while (!((map_data_[idx] == 0) && (thresh == 1)));
 
@@ -130,6 +199,9 @@ bool TargetGenerator::costMapInit()
     map_size_x_ = srv_map.response.map.info.width;
     map_size_y_ = srv_map.response.map.info.height;
     map_data_ = srv_map.response.map.data;
+
+    // Get free space cells in cost map.
+    generateMapFill();
     return true;
   }
   return false;

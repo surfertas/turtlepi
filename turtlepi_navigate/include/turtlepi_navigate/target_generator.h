@@ -5,6 +5,7 @@
 #define TARGET_GENERATOR_H
 
 #include <random>
+#include <unordered_set>
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
@@ -41,6 +42,8 @@ public:
   void mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy);
   void targetMarker(double x, double y);
 
+  void generateMapFill();
+
 private:
   ros::NodeHandle nh_;
   ros::Publisher pub_visualization_marker_;
@@ -50,6 +53,7 @@ private:
   tf2_ros::TransformListener listener_{ tfBuffer_ };
   costmap_2d::Costmap2D cost_map_;
   std::vector<int8_t> map_data_;
+  std::unordered_set<uint32_t> free_space_; 
   geometry_msgs::PoseWithCovarianceStamped current_position_;
 
   uint32_t map_size_x_;
