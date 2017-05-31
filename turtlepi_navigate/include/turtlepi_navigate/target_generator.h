@@ -39,7 +39,8 @@ public:
                              turtlepi_navigate::GenerateTarget::Response& res);
   void setParams();
   bool costMapInit();
-  void mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy);
+  void mapToWorld(uint32_t map_x, uint32_t map_y, double& world_x, double& world_y);
+  void worldToMap(uint32_t& map_x, uint32_t& map_y, double world_x, double world_y);
   void targetMarker(double x, double y);
 
   void generateMapFill();

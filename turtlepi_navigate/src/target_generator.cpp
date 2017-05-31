@@ -54,63 +54,56 @@ void TargetGenerator::generateMapFill()
 {
   // Assumes that first location is a free space.
   // Assumes that the map is a closed environment
-  std::vector<int32_t> visited(map_data_.size(), 0);
-  uint32_t r_start;
-  uint32_t c_start;
-
   struct Cell {
     uint32_t r;
     uint32_t c;
     uint32_t idx;
   };
-
-  // Gets first free space, and uses as starting coordinates in grid map.
-
-  for(auto i = 0; i < map_data_.size(); i++) {
-    if (map_data_[i] == 0) {
-      r_start = (int32_t)(i / map_size_x_);
-      c_start = i - (r_start * map_size_x_);
-    }
-  }
-  std::cout << "r start: " << r_start << "c start: " << c_start << std::endl;
-
+  std::vector<int32_t> visited(map_data_.size(), 0);
   std::queue<Cell> q;
+
   Cell start;
-  start.r = r_start;
-  start.c = c_start;
-  start.idx =  c_start + r_start * (map_size_x_ - 1);
+  worldToMap(start.c, 
+    start.r, 
+    current_position_.pose.pose.position.x, 
+    current_position_.pose.pose.position.y);
+
+  start.idx =  start.r + start.c * (map_size_x_ - 1);
+  visited[start.idx] = -1;
+
   q.push(start);
-  std::cout << "mapsize: " << map_data_.size() << std::endl; 
   while (!q.empty()) {
     Cell cell = q.front();
+    std::cout << "q size" << q.size() << std::endl;
+    std::cout << "q front: " << q.front().r << ": "<< q.front().c << std::endl;
+//    std::cout << "r: " << cell.r << "c: " << cell.c << std::endl;
 
-    std::cout << "r: " << cell.r << "c: " << cell.c << std::endl;
-
-    uint32_t n = cell.c + cell.r+1 * (map_size_x_ - 1);
+    auto n = cell.c + cell.r+1 * (map_size_x_ - 1);
     Cell north = {cell.r+1, cell.c, n};
     
-    uint32_t e = cell.c+1 + cell.r * (map_size_x_ - 1);
+    auto e = cell.c+1 + cell.r * (map_size_x_ - 1);
     Cell east = {cell.r, cell.c+1, e};
 
-    uint32_t s = cell.c + cell.r-1 * (map_size_x_ - 1);
+    auto s = cell.c + cell.r-1 * (map_size_x_ - 1);
     Cell south = {cell.r-1, cell.c, s};
 
-    uint32_t w = cell.c-1 + cell.r * (map_size_x_ - 1);
+    auto w = cell.c-1 + cell.r * (map_size_x_ - 1);
     Cell west = {cell.r, cell.c-1, w};
-    q.pop();
 
     // TODO: Need to debug...it seems like it just keeps on goin in loops. Think
     // about if initializing correctly.
     for (auto b : {north, east, south, west}) {
-        if (visited[b.idx] != -1) {
+        if (visited[b.idx] == 0) {
           q.push(b);
+          visited[b.idx] = -1;
+          //std::cout << "pushed on to queue: " << "(" << b.r <<", " << b.c << ")" << std::endl;
           if (map_data_[b.idx] == 0) {
             free_space_.insert(b.idx);
             std::cout << "Inserting: " << b.idx << std::endl;
-            visited[b.idx] = -1;
           }
         }
     }
+    q.pop();
   }
 
   std::cout << "set of free space created." << std::endl;
@@ -207,10 +200,16 @@ bool TargetGenerator::costMapInit()
   return false;
 }
 
-void TargetGenerator::mapToWorld(uint32_t mx, uint32_t my, double& wx, double& wy)
+void TargetGenerator::mapToWorld(uint32_t map_x, uint32_t map_y, double& world_x, double& world_y)
 {
-  wx = map_origin_x_ + (mx + 0.5) * map_resolution_;
-  wy = map_origin_y_ + (my + 0.5) * map_resolution_;
+  world_x = map_origin_x_ + (map_x + 0.5) * map_resolution_;
+  world_y = map_origin_y_ + (map_y + 0.5) * map_resolution_;
+}
+
+void TargetGenerator::worldToMap(uint32_t& map_x, uint32_t& map_y, double world_x, double world_y)
+{
+  map_x = (uint32_t)((world_x - map_origin_x_) / map_resolution_);
+  map_y = (uint32_t)((world_y - map_origin_y_) / map_resolution_);
 }
 
 void TargetGenerator::targetMarker(double x, double y)
