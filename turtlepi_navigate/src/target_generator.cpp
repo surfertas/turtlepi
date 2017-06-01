@@ -74,8 +74,8 @@ void TargetGenerator::generateMapFill()
   q.push(start);
   while (!q.empty()) {
     Cell cell = q.front();
-    std::cout << "q size" << q.size() << std::endl;
-    std::cout << "q front: " << q.front().r << ": "<< q.front().c << std::endl;
+//    std::cout << "q size" << q.size() << std::endl;
+//    std::cout << "q front: " << q.front().r << ": "<< q.front().c << std::endl;
 //    std::cout << "r: " << cell.r << "c: " << cell.c << std::endl;
 
     auto n = cell.c + cell.r+1 * (map_size_x_ - 1);
@@ -93,6 +93,7 @@ void TargetGenerator::generateMapFill()
     // TODO: Need to debug...it seems like it just keeps on goin in loops. Think
     // about if initializing correctly.
     for (auto b : {north, east, south, west}) {
+        std::cout << b.idx << ": " << visited.size() << std::endl;
         if (visited[b.idx] == 0) {
           q.push(b);
           visited[b.idx] = -1;

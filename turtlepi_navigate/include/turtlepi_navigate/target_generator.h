@@ -52,7 +52,6 @@ private:
   ros::ServiceServer srv_generate_target_;
   tf2_ros::Buffer tfBuffer_;
   tf2_ros::TransformListener listener_{ tfBuffer_ };
-  costmap_2d::Costmap2D cost_map_;
   std::vector<int8_t> map_data_;
   std::unordered_set<uint32_t> free_space_; 
   geometry_msgs::PoseWithCovarianceStamped current_position_;
@@ -63,6 +62,7 @@ private:
   double map_origin_x_;
   double map_origin_y_;
   double theta_;
+  bool init_; 
 
   double DISTANCE_THRESHOLD_;
   double PI_;
