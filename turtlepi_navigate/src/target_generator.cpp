@@ -11,6 +11,7 @@ TargetGenerator::TargetGenerator(ros::NodeHandle& nh) : nh_(nh)
   if (costMapInit())
   {
     std::cout << "Cost map properly initialized." << std::endl;
+    init_ = true;
   }
   else
   {
@@ -19,6 +20,7 @@ TargetGenerator::TargetGenerator(ros::NodeHandle& nh) : nh_(nh)
   setParams();
   registerSubscriber();
   registerPublisher();
+    
   registerService();
 }
 
@@ -48,10 +50,15 @@ void TargetGenerator::registerService()
 void TargetGenerator::currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location)
 {
   current_position_ = *location;
+  if (init_) {
+    generateMapFill();
+    init_ = false;
+  }
 }
 
 void TargetGenerator::generateMapFill()
 {
+  //TODO:  CURRENTLY NOT WORKING!!!!!
   // Assumes that first location is a free space.
   // Assumes that the map is a closed environment
   struct Cell {
@@ -61,50 +68,54 @@ void TargetGenerator::generateMapFill()
   };
   std::vector<int32_t> visited(map_data_.size(), 0);
   std::queue<Cell> q;
+  auto debug = [&](Cell cell){
+    std::cout << "row: " << cell.r << " col: " << cell.c << " idx: " << cell.idx << std::endl;
+    std::cout << "map_value: " << (int)map_data_[cell.idx] << std::endl;
+  };
 
   Cell start;
   worldToMap(start.c, 
     start.r, 
     current_position_.pose.pose.position.x, 
     current_position_.pose.pose.position.y);
-
+  
+  //start.r = (int)(start.idx / map_size_x_);
+  //start.c = start.idx - (start.r * map_size_x_);
+  
+  
   start.idx =  start.r + start.c * (map_size_x_ - 1);
   visited[start.idx] = -1;
-
+  debug(start);
   q.push(start);
   while (!q.empty()) {
     Cell cell = q.front();
-//    std::cout << "q size" << q.size() << std::endl;
-//    std::cout << "q front: " << q.front().r << ": "<< q.front().c << std::endl;
-//    std::cout << "r: " << cell.r << "c: " << cell.c << std::endl;
 
-    auto n = cell.c + cell.r+1 * (map_size_x_ - 1);
+    auto n = cell.c + (cell.r+1) * (map_size_x_ - 1);
     Cell north = {cell.r+1, cell.c, n};
     
     auto e = cell.c+1 + cell.r * (map_size_x_ - 1);
     Cell east = {cell.r, cell.c+1, e};
 
-    auto s = cell.c + cell.r-1 * (map_size_x_ - 1);
+    auto s = cell.c + (cell.r-1) * (map_size_x_ - 1);
     Cell south = {cell.r-1, cell.c, s};
 
     auto w = cell.c-1 + cell.r * (map_size_x_ - 1);
     Cell west = {cell.r, cell.c-1, w};
 
-    // TODO: Need to debug...it seems like it just keeps on goin in loops. Think
-    // about if initializing correctly.
+    // TODO: Need to debug...
+    // 1. what is static map returning a map with values of -1 primarily
+    // 2. 
+    q.pop();
+ 
     for (auto b : {north, east, south, west}) {
-        std::cout << b.idx << ": " << visited.size() << std::endl;
-        if (visited[b.idx] == 0) {
+        if ((visited[b.idx] == 0) && (map_data_[b.idx] == 0)) {
+          debug(b);
           q.push(b);
           visited[b.idx] = -1;
-          //std::cout << "pushed on to queue: " << "(" << b.r <<", " << b.c << ")" << std::endl;
-          if (map_data_[b.idx] == 0) {
-            free_space_.insert(b.idx);
-            std::cout << "Inserting: " << b.idx << std::endl;
-          }
+          free_space_.insert(b.idx);
+          std::cout << "Inserting: " << b.idx << std::endl;
         }
     }
-    q.pop();
   }
 
   std::cout << "set of free space created." << std::endl;
@@ -178,7 +189,7 @@ void TargetGenerator::setParams()
 
 bool TargetGenerator::costMapInit()
 {
-  while (!ros::service::waitForService("static_map", ros::Duration(3.0)))
+  while (!ros::service::waitForService("static_map", ros::Duration(-1)))
   {
     std::cout << "Waiting for static_map" << std::endl;
   }
@@ -193,9 +204,6 @@ bool TargetGenerator::costMapInit()
     map_size_x_ = srv_map.response.map.info.width;
     map_size_y_ = srv_map.response.map.info.height;
     map_data_ = srv_map.response.map.data;
-
-    // Get free space cells in cost map.
-    generateMapFill();
     return true;
   }
   return false;
