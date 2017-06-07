@@ -10,10 +10,13 @@ find_package(catkin REQUIRED
   roscpp
   rosbag  
   std_srvs 
+  geometry_msgs
+  sensor_msgs
+  message_filters
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -108,6 +111,9 @@ catkin_package(
   CATKIN_DEPENDS 
     roscpp
     std_srvs  
+    geometry_msgs
+    sensor_msgs
+    message_filters
 #  DEPENDS system_lib
 )
 
