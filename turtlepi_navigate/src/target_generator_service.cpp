@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include "turtlepi_navigate/target_generator.h"
+#include <turtlepi_navigate/target_generator.h>
 
 int main(int argc, char** argv)
 {

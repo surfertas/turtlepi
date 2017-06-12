@@ -50,10 +50,15 @@ void TargetGenerator::registerService()
 void TargetGenerator::currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location)
 {
   current_position_ = *location;
+
+  // TODO: Is not implemented. Was trying to make target generation more
+  // efficient by removing the need to randomly select from the entire grid.
+  /*
   if (init_) {
     generateMapFill();
     init_ = false;
   }
+  */
 }
 
 void TargetGenerator::generateMapFill()
