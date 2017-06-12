@@ -3,7 +3,6 @@
 
 #include <ros/ros.h>
 #include <rosbag/recorder.h>
-//#include <turtlepi_recorder/RecordTopics.h>
 #include <std_srvs/SetBool.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <sensor_msgs/LaserScan.h>
@@ -14,7 +13,10 @@
 
 namespace turtlepi_recorder
 {
-typedef message_filters::sync_policies::ApproximateTime<geometry_msgs::PoseWithCovarianceStamped, sensor_msgs::LaserScan> SyncPolicy;
+typedef message_filters::sync_policies::ApproximateTime<
+  geometry_msgs::PoseWithCovarianceStamped, 
+  sensor_msgs::LaserScan
+> SyncPolicy;
 
 class TurtlepiRecorder
 {

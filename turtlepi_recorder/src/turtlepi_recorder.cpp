@@ -6,11 +6,12 @@ TurtlepiRecorder::TurtlepiRecorder(ros::NodeHandle& nh, rosbag::RecorderOptions 
     nh_(nh), 
     recorder_(options),
     sub_amcl_pose_(nh_, "amcl_pose", 1),
-    sub_laser_scan_(nh_, "laser_scan", 1),
+    sub_laser_scan_(nh_, "scan", 1),
     sync_(SyncPolicy(10), sub_amcl_pose_, sub_laser_scan_)
 {
   registerService();
   registerSubscriber();
+  registerPublisher();
 
   std::cout << "Initialized recorder." << std::endl;
   recorder_on_ = false;
@@ -30,7 +31,7 @@ TurtlepiRecorder::~TurtlepiRecorder()
 
 void TurtlepiRecorder::registerSubscriber()
 {
-  sync_.registerCallback(boost::bind(&TurtlepiRecorder::timeSyncCallback, _1, _2));
+  sync_.registerCallback(boost::bind(&TurtlepiRecorder::timeSyncCallback, this, _1, _2));
 }
 
 void TurtlepiRecorder::registerPublisher()
@@ -38,7 +39,7 @@ void TurtlepiRecorder::registerPublisher()
   pub_sync_amcl_ =
     nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("/synced/amcl_pose", 1000);
   pub_sync_scan_ =
-    nh_.advertise<sensor_msgs::LaserScan>("/synced/laser_scan", 1000);
+    nh_.advertise<sensor_msgs::LaserScan>("/synced/scan", 1000);
 }
 
 void TurtlepiRecorder::registerService()
@@ -48,8 +49,8 @@ void TurtlepiRecorder::registerService()
 }
 
 void
-TurtlepiRecorder::timeSyncCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pose_msg, 
-                                   const sensor_msgs::LaserScan::ConstPtr& scan_msg)
+TurtlepiRecorder::timeSyncCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& pose_msg, 
+                                   const sensor_msgs::LaserScanConstPtr& scan_msg)
 {
   pub_sync_amcl_.publish(pose_msg);
   pub_sync_scan_.publish(scan_msg); 
