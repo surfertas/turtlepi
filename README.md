@@ -7,7 +7,6 @@ mkdir -p turtlepi_ws/src
 git clone https://github.com/surfertas/turtlepi.git turtlepi_ws/src
 cd turtlepi_ws/src
 # Install turtlebot packages for melodic
-chmod a+x install_all.sh
 ./install_all.sh
 cd ..
 catkin build
