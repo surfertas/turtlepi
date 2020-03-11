@@ -16,14 +16,14 @@ source devel/setup.bash
 To run open three separate windows. Don't forget to source devel/setup.bash if
 not done so already for each window.
 
-Window 1: Launch Gazebo, Rviz. The world env0.world is defined in `/models/env0`
+Window 1: Launch Gazebo, Rviz. The world env0.world is defined in `/models/env0`.
 ```
 cd turtlepi_gazebo/launch
 roslaunch turtlepi.launch
 ```
 
 Window 2: Start up recorder. Specify which topics to record by editing
-`turtlepi.yaml` in `/config`
+`turtlepi.yaml` in `/config`. Make sure to update the path to bag to store the recordings.
 
 ```
 cd turtlepi_recorder/launch
@@ -37,7 +37,7 @@ roslaunch turtlepi_gentarget.launch
 ```
 
 This generate targets and bag files will be automatically generated and stored
-in the directory specified in `/turtlepi_recorder/config`
+in the directory specified in `/turtlepi_recorder/config`.
 
 TODO:
 
