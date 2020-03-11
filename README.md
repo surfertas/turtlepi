@@ -2,8 +2,20 @@ Turtlepi
 ---
 ### Packages related to Turtlepi
 
-To run open three separate windows. Dont forget to source devel/setup.bash if
-not done so already.
+```
+mkdir -p turtlepi_ws/src
+git clone https://github.com/surfertas/turtlepi.git turtlepi_ws/src
+cd turtlepi_ws/src
+# Install turtlebot packages for melodic
+chmod a+x install_all.sh
+./install_all.sh
+cd ..
+catkin build
+source devel/setup.bash
+```
+
+To run open three separate windows. Don't forget to source devel/setup.bash if
+not done so already for each window.
 
 Window 1: Launch Gazebo, Rviz. The world env0.world is defined in `/models/env0`
 ```
@@ -32,5 +44,3 @@ TODO:
 
 1. Currently trying to figure out how to record tf and cmd_vel by syncing with
 other topics.
-
-
