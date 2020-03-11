@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>turtlepi_gazebo</name>
+  <version>0.0.0</version>
+  <description>The turtlepi_gazebo package</description>
+  <maintainer email="tasuku@gmail.com">Tasuku</maintainer>
+  <license>MIT</license>
+  <exec_depend>gazebo_ros</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  <export>
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros gazebo_media_path="${prefix}/worlds"/>
+  </export>
+</package>
