@@ -14,7 +14,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <tf/transform_listener.h>
 
-#include <turtlepi_navigate/GenerateTarget.h>
+#include <turtlepi_interfaces/GenerateTarget.h>
 
 namespace turtlepi_navigate
 {
@@ -27,7 +27,7 @@ public:
   virtual ~TurtlepiNavigate();
 
   void registerPublisher();
-  void sendTarget(turtlepi_navigate::GenerateTarget srv);
+  void sendTarget(turtlepi_interfaces::GenerateTarget srv);
 
 private:
   ros::NodeHandle nh_;

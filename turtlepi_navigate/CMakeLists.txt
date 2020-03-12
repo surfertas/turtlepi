@@ -4,56 +4,41 @@ project(turtlepi_navigate)
 add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
-  costmap_2d 
+  costmap_2d
   actionlib
   move_base_msgs
   geometry_msgs
   nav_msgs
-  map_msgs 
+  map_msgs
   std_msgs
   visualization_msgs
   tf2_geometry_msgs
   tf
   roscpp
-  message_generation
+  turtlepi_interfaces
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
 
-add_service_files(
-  FILES
-  GenerateTarget.srv
-)
-
-generate_messages(
-  DEPENDENCIES
-  geometry_msgs 
-  nav_msgs
-  map_msgs
-  std_msgs
-  actionlib_msgs 
-  move_base_msgs
-)
 
 catkin_package(
-  INCLUDE_DIRS 
+  INCLUDE_DIRS
     include
-#  LIBRARIES turtlepi_navigate
-  CATKIN_DEPENDS 
+  CATKIN_DEPENDS
     costmap_2d
-    actionlib 
+    actionlib
     move_base_msgs
     nav_msgs
     map_msgs
     std_msgs
-    geometry_msgs 
+    geometry_msgs
     visualization_msgs
     tf2_geometry_msgs
     tf
     roscpp
-#  DEPENDS system_lib
+    turtlepi_interfaces
 )
-    
+
 
 ###########
 ## Build ##
@@ -65,7 +50,7 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
 )
 
-add_executable(turtlepi_nav_node 
+add_executable(turtlepi_nav_node
   src/turtlepi_nav_node.cpp
   src/turtlepi_nav.cpp
 )
@@ -83,4 +68,3 @@ target_link_libraries(turtlepi_nav_node
 target_link_libraries(target_generator_service
    ${catkin_LIBRARIES}
 )
-

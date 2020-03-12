@@ -21,7 +21,7 @@
 #include <costmap_2d/cost_values.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
-#include <turtlepi_navigate/GenerateTarget.h>
+#include <turtlepi_interfaces/GenerateTarget.h>
 
 namespace turtlepi_navigate
 {
@@ -35,8 +35,8 @@ public:
   void registerPublisher();
   void registerService();
   void currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location);
-  bool generateTargetService(turtlepi_navigate::GenerateTarget::Request& req,
-                             turtlepi_navigate::GenerateTarget::Response& res);
+  bool generateTargetService(turtlepi_interfaces::GenerateTarget::Request& req,
+                             turtlepi_interfaces::GenerateTarget::Response& res);
   void setParams();
   bool costMapInit();
   void mapToWorld(uint32_t map_x, uint32_t map_y, double& world_x, double& world_y);
@@ -53,7 +53,7 @@ private:
   tf2_ros::Buffer tfBuffer_;
   tf2_ros::TransformListener listener_{ tfBuffer_ };
   std::vector<int8_t> map_data_;
-  std::unordered_set<uint32_t> free_space_; 
+  std::unordered_set<uint32_t> free_space_;
   geometry_msgs::PoseWithCovarianceStamped current_position_;
 
   uint32_t map_size_x_;
@@ -62,7 +62,7 @@ private:
   double map_origin_x_;
   double map_origin_y_;
   double theta_;
-  bool init_; 
+  bool init_;
 
   double DISTANCE_THRESHOLD_;
   double PI_;
