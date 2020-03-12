@@ -20,7 +20,7 @@ void TurtlepiNavigate::registerPublisher()
   pub_episode_result_ = nh_.advertise<std_msgs::String>("/turtlepi_navigate/episode_result", 0);
 }
 
-void TurtlepiNavigate::sendTarget(turtlepi_navigate::GenerateTarget srv)
+void TurtlepiNavigate::sendTarget(turtlepi_interfaces::GenerateTarget srv)
 {
   std_srvs::SetBool toggle;
   toggle.request.data = true;
