@@ -8,8 +8,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   turtlepi_navigate::TurtlepiNavigate navigator(nh, "move_base");
-
-  turtlepi_navigate::GenerateTarget srv;
+  turtlepi_interfaces::GenerateTarget srv;
 
   while (true)
   {

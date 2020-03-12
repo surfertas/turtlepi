@@ -20,7 +20,7 @@ TargetGenerator::TargetGenerator(ros::NodeHandle& nh) : nh_(nh)
   setParams();
   registerSubscriber();
   registerPublisher();
-    
+
   registerService();
 }
 
@@ -79,15 +79,15 @@ void TargetGenerator::generateMapFill()
   };
 
   Cell start;
-  worldToMap(start.c, 
-    start.r, 
-    current_position_.pose.pose.position.x, 
+  worldToMap(start.c,
+    start.r,
+    current_position_.pose.pose.position.x,
     current_position_.pose.pose.position.y);
-  
+
   //start.r = (int)(start.idx / map_size_x_);
   //start.c = start.idx - (start.r * map_size_x_);
-  
-  
+
+
   start.idx =  start.r + start.c * (map_size_x_ - 1);
   visited[start.idx] = -1;
   debug(start);
@@ -97,7 +97,7 @@ void TargetGenerator::generateMapFill()
 
     auto n = cell.c + (cell.r+1) * (map_size_x_ - 1);
     Cell north = {cell.r+1, cell.c, n};
-    
+
     auto e = cell.c+1 + cell.r * (map_size_x_ - 1);
     Cell east = {cell.r, cell.c+1, e};
 
@@ -109,9 +109,9 @@ void TargetGenerator::generateMapFill()
 
     // TODO: Need to debug...
     // 1. what is static map returning a map with values of -1 primarily
-    // 2. 
+    // 2.
     q.pop();
- 
+
     for (auto b : {north, east, south, west}) {
         if ((visited[b.idx] == 0) && (map_data_[b.idx] == 0)) {
           debug(b);
@@ -126,11 +126,11 @@ void TargetGenerator::generateMapFill()
   std::cout << "set of free space created." << std::endl;
   for (auto i : free_space_)
     std::cout << i << " ";
-  
+
 }
 
-bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::Request& req,
-                                            turtlepi_navigate::GenerateTarget::Response& res)
+bool TargetGenerator::generateTargetService(turtlepi_interfaces::GenerateTarget::Request& req,
+                                            turtlepi_interfaces::GenerateTarget::Response& res)
 {
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -159,9 +159,9 @@ bool TargetGenerator::generateTargetService(turtlepi_navigate::GenerateTarget::R
 
     mapToWorld(map_x, map_y, world_x, world_y);
     idx = map_x + map_y * map_size_x_;
-    thresh = checkThresh(current_position_.pose.pose.position.x, 
-                    current_position_.pose.pose.position.y, 
-                    world_x, 
+    thresh = checkThresh(current_position_.pose.pose.position.x,
+                    current_position_.pose.pose.position.y,
+                    world_x,
                     world_y);
 
   } while (!((map_data_[idx] == 0) && (thresh == 1)));
