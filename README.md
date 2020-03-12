@@ -2,6 +2,8 @@ Turtlepi
 ---
 ### Packages related to Turtlepi
 
+Generates random targets from a feasible target space and records commands to a ros bag.
+
 ```
 mkdir -p turtlepi_ws/src
 git clone https://github.com/surfertas/turtlepi.git turtlepi_ws/src
@@ -43,3 +45,6 @@ TODO:
 
 1. Currently trying to figure out how to record tf and cmd_vel by syncing with
 other topics.
+
+### Related posts
+[Turtlepi #7: Automatic Target Generation for the Turtlebot](http://surfertas.github.io/ros/2017/05/23/autotarget.html)
