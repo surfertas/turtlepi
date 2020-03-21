@@ -31,19 +31,60 @@ public:
   TargetGenerator(ros::NodeHandle& nh);
   virtual ~TargetGenerator();
 
-  void registerSubscriber();
-  void registerPublisher();
-  void registerService();
-  void currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location);
-  bool generateTargetService(turtlepi_interfaces::GenerateTarget::Request& req,
-                             turtlepi_interfaces::GenerateTarget::Response& res);
-  void setParams();
-  bool costMapInit();
-  void mapToWorld(uint32_t map_x, uint32_t map_y, double& world_x, double& world_y);
-  void worldToMap(uint32_t& map_x, uint32_t& map_y, double world_x, double world_y);
-  void targetMarker(double x, double y);
+  /// Register subscribers related to navigation.
+  void
+  registerSubscriber();
 
-  void generateMapFill();
+  /// Register publisher used for visualization.
+  void
+  registerPublisher();
+
+  /// Register service that generates navigation target.
+  void
+  registerService();
+
+  /// Call back that updates the current position.
+  void
+  currentPositionCB(
+    const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location);
+
+  /// Service that generates a random target.
+  bool
+  generateTargetService(
+    turtlepi_interfaces::GenerateTarget::Request& req,
+    turtlepi_interfaces::GenerateTarget::Response& res);
+
+  /// Set target orientation of robot.
+  void
+  setParams();
+
+  /// Initialize the cost map.
+  bool
+  costMapInit();
+
+  /// Map to world conversion.
+  void
+  mapToWorld(
+    const uint32_t map_x,
+    const uint32_t map_y,
+    double& world_x,
+    double& world_y) const;
+
+  /// World to map conversion.
+  void
+  worldToMap(
+    uint32_t& map_x,
+    uint32_t& map_y,
+    const double world_x,
+    const double world_y) const;
+
+  /// Creates and publishes a marker.
+  void
+  targetMarker(const double x, const double y) const;
+
+  /// WIP: TODO: not working, need to debug.
+  void
+  generateMapFill();
 
 private:
   ros::NodeHandle nh_;
