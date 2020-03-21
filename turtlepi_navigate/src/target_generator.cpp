@@ -6,7 +6,8 @@ using costmap_2d::LETHAL_OBSTACLE;
 using costmap_2d::NO_INFORMATION;
 using costmap_2d::FREE_SPACE;
 
-TargetGenerator::TargetGenerator(ros::NodeHandle& nh) : nh_(nh)
+TargetGenerator::TargetGenerator(ros::NodeHandle& nh)
+: nh_(nh)
 {
   if (costMapInit())
   {
@@ -29,25 +30,30 @@ TargetGenerator::~TargetGenerator()
   srv_generate_target_.shutdown();
 }
 
-void TargetGenerator::registerSubscriber()
+void
+TargetGenerator::registerSubscriber()
 {
   sub_turtlepi_location_ = nh_.subscribe("/amcl_pose", 10, &TargetGenerator::currentPositionCB, this);
   std::cout << "Registered subscriber." << std::endl;
 }
 
-void TargetGenerator::registerPublisher()
+void
+TargetGenerator::registerPublisher()
 {
   pub_visualization_marker_ = nh_.advertise<visualization_msgs::Marker>("/turtlepi_navigate/visualization_marker", 0);
 }
 
-void TargetGenerator::registerService()
+void
+TargetGenerator::registerService()
 {
   srv_generate_target_ =
       nh_.advertiseService("/turtlepi_navigate/generate_nav_target", &TargetGenerator::generateTargetService, this);
   std::cout << "Registered generate target server." << std::endl;
 }
 
-void TargetGenerator::currentPositionCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location)
+void
+TargetGenerator::currentPositionCB(
+  const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& location)
 {
   current_position_ = *location;
 
@@ -61,7 +67,8 @@ void TargetGenerator::currentPositionCB(const geometry_msgs::PoseWithCovarianceS
   */
 }
 
-void TargetGenerator::generateMapFill()
+void
+TargetGenerator::generateMapFill()
 {
   //TODO:  CURRENTLY NOT WORKING!!!!!
   // Assumes that first location is a free space.
@@ -126,11 +133,12 @@ void TargetGenerator::generateMapFill()
   std::cout << "set of free space created." << std::endl;
   for (auto i : free_space_)
     std::cout << i << " ";
-
 }
 
-bool TargetGenerator::generateTargetService(turtlepi_interfaces::GenerateTarget::Request& req,
-                                            turtlepi_interfaces::GenerateTarget::Response& res)
+bool
+TargetGenerator::generateTargetService(
+  turtlepi_interfaces::GenerateTarget::Request& req,
+  turtlepi_interfaces::GenerateTarget::Response& res)
 {
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -184,7 +192,8 @@ bool TargetGenerator::generateTargetService(turtlepi_interfaces::GenerateTarget:
   return res.success;
 }
 
-void TargetGenerator::setParams()
+void
+TargetGenerator::setParams()
 {
   // set target orientation of robot.
   theta_ = 90.0;
@@ -192,7 +201,8 @@ void TargetGenerator::setParams()
   DISTANCE_THRESHOLD_ = 8.0;
 }
 
-bool TargetGenerator::costMapInit()
+bool
+TargetGenerator::costMapInit()
 {
   while (!ros::service::waitForService("static_map", ros::Duration(-1)))
   {
@@ -214,19 +224,30 @@ bool TargetGenerator::costMapInit()
   return false;
 }
 
-void TargetGenerator::mapToWorld(uint32_t map_x, uint32_t map_y, double& world_x, double& world_y)
+void
+TargetGenerator::mapToWorld(
+  const uint32_t map_x,
+  const uint32_t map_y,
+  double& world_x,
+  double& world_y) const
 {
   world_x = map_origin_x_ + (map_x + 0.5) * map_resolution_;
   world_y = map_origin_y_ + (map_y + 0.5) * map_resolution_;
 }
 
-void TargetGenerator::worldToMap(uint32_t& map_x, uint32_t& map_y, double world_x, double world_y)
+void
+TargetGenerator::worldToMap(
+  uint32_t& map_x,
+  uint32_t& map_y,
+  const double world_x,
+  const double world_y) const
 {
   map_x = (uint32_t)((world_x - map_origin_x_) / map_resolution_);
   map_y = (uint32_t)((world_y - map_origin_y_) / map_resolution_);
 }
 
-void TargetGenerator::targetMarker(double x, double y)
+void
+TargetGenerator::targetMarker(const double x, const double y) const
 {
   visualization_msgs::Marker marker;
   marker.header.frame_id = "map";
