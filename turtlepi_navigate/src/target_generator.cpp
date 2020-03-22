@@ -9,13 +9,10 @@ using costmap_2d::FREE_SPACE;
 TargetGenerator::TargetGenerator(ros::NodeHandle& nh)
 : nh_(nh)
 {
-  if (costMapInit())
-  {
+  if (costMapInit()) {
     std::cout << "Cost map properly initialized." << std::endl;
     init_ = true;
-  }
-  else
-  {
+  } else {
     std::cout << "Issues initializing cost map." << std::endl;
   }
   setParams();
@@ -150,18 +147,15 @@ TargetGenerator::generateTargetService(
   double world_x, world_y;
   uint32_t idx;
   bool thresh;
-  auto checkThresh = [&](double x, double y, double wx, double wy)
-  {
+  auto checkThresh = [&](double x, double y, double wx, double wy) {
     return sqrt(pow(wx - x, 2) + pow(wy - y, 2)) > DISTANCE_THRESHOLD_;
   };
 
-  auto printTarget = [](double wx, double wy)
-  {
+  auto printTarget = [](double wx, double wy) {
     std::cout << "Target: (" << wx << " ," << wy << ")" << std::endl;
   };
 
-  do
-  {
+  do {
     uint32_t map_x = grid_x(gen);
     uint32_t map_y = grid_y(gen);
 
@@ -204,15 +198,13 @@ TargetGenerator::setParams()
 bool
 TargetGenerator::costMapInit()
 {
-  while (!ros::service::waitForService("static_map", ros::Duration(-1)))
-  {
+  while (!ros::service::waitForService("static_map", ros::Duration(-1))) {
     std::cout << "Waiting for static_map" << std::endl;
   }
   ros::ServiceClient map_service_client = nh_.serviceClient<nav_msgs::GetMap>("static_map");
   nav_msgs::GetMap srv_map;
 
-  if (map_service_client.call(srv_map))
-  {
+  if (map_service_client.call(srv_map)) {
     map_origin_x_ = srv_map.response.map.info.origin.position.x;
     map_origin_y_ = srv_map.response.map.info.origin.position.y;
     map_resolution_ = srv_map.response.map.info.resolution;

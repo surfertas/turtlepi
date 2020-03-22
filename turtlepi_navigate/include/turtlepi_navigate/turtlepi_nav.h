@@ -26,8 +26,13 @@ public:
   TurtlepiNavigate(ros::NodeHandle& nh, std::string action_server);
   virtual ~TurtlepiNavigate();
 
-  void registerPublisher();
-  void sendTarget(turtlepi_interfaces::GenerateTarget srv);
+  /// Register publisher to publish episode results.
+  void
+  registerPublisher();
+
+  /// Service to send target to robot.
+  void
+  sendTarget(turtlepi_interfaces::GenerateTarget srv);
 
 private:
   ros::NodeHandle nh_;
